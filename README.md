@@ -1,70 +1,222 @@
-# Getting Started with Create React App
+Azure Cloud Resume Challenge - React CV
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Welcome to my Azure Cloud Resume Challenge! This project is a React-based CV deployed on Azure Static Web Apps, integrated with Azure Functions and Cosmos DB to track visitor counts. The challenge showcases my cloud, frontend, and backend skills while following best practices in CI/CD automation.
 
-## Available Scripts
+Live Demo
 
-In the project directory, you can run:
+View my Cloud Resume
 
-### `npm start`
+Project Overview
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This project is part of the Azure Cloud Resume Challenge, demonstrating:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Frontend: Built with React and hosted on Azure Static Web Apps
 
-### `npm test`
+Backend: Serverless API using Azure Functions (Go)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Database: Visitor counter stored in Azure Cosmos DB
 
-### `npm run build`
+CI/CD: Automated deployments with GitHub Actions
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Technologies Used
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Frontend: React, Material-UI
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Backend: Azure Functions (Go)
 
-### `npm run eject`
+Database: Azure Cosmos DB
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+CI/CD: GitHub Actions
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Cloud Hosting: Azure Static Web Apps
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Features
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Live Cloud-Hosted Resume
 
-## Learn More
+Real-Time Visitor Counter (Azure Functions + Cosmos DB)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Automated Deployments via GitHub Actions
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Fully Responsive UI with Material-UI
 
-### Code Splitting
+Setup & Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. Clone the Repository
 
-### Analyzing the Bundle Size
+git clone https://github.com/yourusername/azure-cloud-resume.git
+cd azure-cloud-resume
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+2. Install Dependencies
 
-### Making a Progressive Web App
+npm install
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+3. Run Locally
 
-### Advanced Configuration
+npm start
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+4. Deploy to Azure Static Web Apps
 
-### Deployment
+Go to Azure Portal → Create Static Web App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Connect GitHub repo → Set build folder as build/
 
-### `npm run build` fails to minify
+Deploy
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Backend Setup (Visitor Counter API in Go)
+
+1. Create Azure Function in Go
+
+func init --worker-runtime go
+func new --name GetVisitorCount --template "HTTP trigger" --authlevel "anonymous"
+
+2. Connect to Cosmos DB
+
+Create Azure Cosmos DB (NoSQL)
+
+Add a database: resume-db
+
+Add a container: visitors
+
+Add a sample document:
+
+{
+  "id": "1",
+  "count": 0
+}
+
+3. Update GetVisitorCount/main.go
+
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/data/azcosmos"
+	"github.com/Azure/azure-functions-go/api"
+)
+
+type VisitorCount struct {
+	ID    string `json:"id"`
+	Count int    `json:"count"`
+}
+
+func GetVisitorCount(w http.ResponseWriter, r *http.Request) {
+	cosmosEndpoint := os.Getenv("COSMOS_DB_ENDPOINT")
+	cosmosKey := os.Getenv("COSMOS_DB_KEY")
+	databaseName := "resume-db"
+	containerName := "visitors"
+
+	client, err := azcosmos.NewClientWithKey(cosmosEndpoint, cosmosKey, nil)
+	if err != nil {
+		http.Error(w, "Failed to connect to Cosmos DB", http.StatusInternalServerError)
+		return
+	}
+
+	ctx := context.Background()
+	container := client.NewContainer(databaseName, containerName)
+	itemID := "1"
+
+	itemResponse, err := container.ReadItem(ctx, azcosmos.PartitionKey{itemID}, itemID, nil)
+	if err != nil {
+		http.Error(w, "Error reading item from Cosmos DB", http.StatusInternalServerError)
+		return
+	}
+
+	var visitor VisitorCount
+	err = json.Unmarshal(itemResponse.Value, &visitor)
+	if err != nil {
+		http.Error(w, "Error parsing JSON", http.StatusInternalServerError)
+		return
+	}
+
+	visitor.Count++
+
+	_, err = container.ReplaceItem(ctx, azcosmos.PartitionKey{itemID}, itemID, visitor, nil)
+	if err != nil {
+		http.Error(w, "Error updating visitor count", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(visitor)
+}
+
+func main() {
+	api.HandleFunc(GetVisitorCount)
+	api.Listen()
+}
+
+4. Deploy to Azure Functions
+
+func azure functionapp publish <your-function-app-name>
+
+Running Tests for Azure Function in Go
+
+1. Install testing framework
+
+Go has a built-in testing package.
+
+2. Create a Test File GetVisitorCount/main_test.go
+
+package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestGetVisitorCount(t *testing.T) {
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(GetVisitorCount)
+	handler.ServeHTTP(recorder, req)
+
+	if status := recorder.Code; status != http.StatusOK {
+		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+3. Run the test
+
+go test -v
+
+How It Works
+
+Frontend (React CV) → Fetches visitor count from Azure Functions API
+
+Backend (Azure Function) → Reads & updates the visitor count in Cosmos DB
+
+Database (Cosmos DB) → Stores the total visitor count
+
+CI/CD (GitHub Actions) → Auto-deploys updates to Azure
+
+Future Enhancements
+
+Add authentication & admin dashboard
+
+Improve performance & caching
+
+Deploy using Terraform for Infrastructure as Code (IaC)
+
+Author
+
+Mary Yunju Kim
+
+LinkedIn
+
+Email
+
+Acknowledgments
+
+This project is inspired by the Azure Cloud Resume Challenge by Forrest Brazeal.
+

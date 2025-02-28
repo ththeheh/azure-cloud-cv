@@ -1,98 +1,83 @@
-Azure Cloud Resume Challenge - React CV
+# Azure Cloud Resume Challenge - React CV
 
-Welcome to my Azure Cloud Resume Challenge! This project is a React-based CV deployed on Azure Static Web Apps, integrated with Azure Functions and Cosmos DB to track visitor counts. The challenge showcases my cloud, frontend, and backend skills while following best practices in CI/CD automation.
+This project is a **React-based CV** deployed on **Azure Static Web Apps**, with a **Go-based Azure Function** and **Cosmos DB** to track visitor counts. It demonstrates cloud, frontend, and backend skills while following **CI/CD best practices**.
 
-Live Demo
+## Live Demo
+🔗 [View Resume](https://your-azure-static-web-app-url)
 
-View my Cloud Resume
+---
 
-Project Overview
+## Project Overview
+This project is part of the **Azure Cloud Resume Challenge**, demonstrating:
+- **Frontend:** React, hosted on **Azure Static Web Apps**
+- **Backend:** Serverless API using **Azure Functions (Go)**
+- **Database:** Visitor counter stored in **Azure Cosmos DB**
+- **CI/CD:** Automated deployments via **GitHub Actions**
 
-This project is part of the Azure Cloud Resume Challenge, demonstrating:
+---
 
-Frontend: Built with React and hosted on Azure Static Web Apps
+## Technologies Used
+- **Frontend:** React, Material-UI
+- **Backend:** Azure Functions (Go)
+- **Database:** Azure Cosmos DB (NoSQL)
+- **CI/CD:** GitHub Actions
+- **Cloud Hosting:** Azure Static Web Apps
 
-Backend: Serverless API using Azure Functions (Go)
+---
 
-Database: Visitor counter stored in Azure Cosmos DB
+## Features
+- **Live Cloud-Hosted Resume**
+- **Real-Time Visitor Counter (Azure Functions + Cosmos DB)**
+- **Automated Deployments via GitHub Actions**
+- **Fully Responsive UI with Material-UI**
 
-CI/CD: Automated deployments with GitHub Actions
+---
 
-Technologies Used
-
-Frontend: React, Material-UI
-
-Backend: Azure Functions (Go)
-
-Database: Azure Cosmos DB
-
-CI/CD: GitHub Actions
-
-Cloud Hosting: Azure Static Web Apps
-
-Features
-
-Live Cloud-Hosted Resume
-
-Real-Time Visitor Counter (Azure Functions + Cosmos DB)
-
-Automated Deployments via GitHub Actions
-
-Fully Responsive UI with Material-UI
-
-Setup & Deployment
-
-1. Clone the Repository
-
+## Setup & Deployment
+### 1️⃣ Clone the Repository
+```sh
 git clone https://github.com/yourusername/azure-cloud-resume.git
 cd azure-cloud-resume
-
-2. Install Dependencies
-
+```
+### 2️⃣ Install Dependencies
+```sh
 npm install
-
-3. Run Locally
-
+```
+### 3️⃣ Run Locally
+```sh
 npm start
+```
+### 4️⃣ Deploy to Azure Static Web Apps
+1. Go to **Azure Portal** → Create **Static Web App**
+2. Connect GitHub repo → Set build folder as `build/`
+3. Deploy!
 
-4. Deploy to Azure Static Web Apps
+---
 
-Go to Azure Portal → Create Static Web App
-
-Connect GitHub repo → Set build folder as build/
-
-Deploy
-
-Backend Setup (Visitor Counter API in Go)
-
-1. Create Azure Function in Go
-
+## Backend Setup (Visitor Counter API in Go)
+### 1️⃣ Create an Azure Function in Go
+```sh
 func init --worker-runtime go
 func new --name GetVisitorCount --template "HTTP trigger" --authlevel "anonymous"
-
-2. Connect to Cosmos DB
-
-Create Azure Cosmos DB (NoSQL)
-
-Add a database: resume-db
-
-Add a container: visitors
-
-Add a sample document:
-
-{
-  "id": "1",
-  "count": 0
-}
-
-3. Update GetVisitorCount/main.go
-
+```
+### 2️⃣ Connect to Cosmos DB
+- Create **Azure Cosmos DB (NoSQL)**
+- Add a **database:** `resume-db`
+- Add a **container:** `visitors`
+- Add a sample document:
+  ```json
+  {
+    "id": "1",
+    "count": 0
+  }
+  ```
+### 3️⃣ Implement `GetVisitorCount/main.go`
+```go
 package main
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -150,19 +135,18 @@ func main() {
 	api.HandleFunc(GetVisitorCount)
 	api.Listen()
 }
-
-4. Deploy to Azure Functions
-
+```
+### 4️⃣ Deploy to Azure Functions
+```sh
 func azure functionapp publish <your-function-app-name>
+```
 
-Running Tests for Azure Function in Go
+---
 
-1. Install testing framework
-
-Go has a built-in testing package.
-
-2. Create a Test File GetVisitorCount/main_test.go
-
+## Running Tests for Azure Function in Go
+### 1️⃣ Run Go Unit Tests
+Create `GetVisitorCount/main_test.go`:
+```go
 package main
 
 import (
@@ -185,38 +169,36 @@ func TestGetVisitorCount(t *testing.T) {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 }
-
-3. Run the test
-
+```
+### 2️⃣ Run Tests
+```sh
 go test -v
+```
 
-How It Works
+---
 
-Frontend (React CV) → Fetches visitor count from Azure Functions API
+## How It Works
+1. **Frontend (React CV)** → Fetches visitor count from Azure Functions API
+2. **Backend (Azure Function)** → Reads & updates the visitor count in Cosmos DB
+3. **Database (Cosmos DB)** → Stores the total visitor count
+4. **CI/CD (GitHub Actions)** → Auto-deploys updates to Azure
 
-Backend (Azure Function) → Reads & updates the visitor count in Cosmos DB
+---
 
-Database (Cosmos DB) → Stores the total visitor count
+## Future Enhancements
+- Add authentication & admin dashboard
+- Improve performance & caching
+- Deploy using Terraform for Infrastructure as Code (IaC)
 
-CI/CD (GitHub Actions) → Auto-deploys updates to Azure
+---
 
-Future Enhancements
+## Author
+**Mary Yunju Kim**
+- [LinkedIn](https://linkedin.com/in/mary-yunju-kim-610002123)
+- [Email](mailto:maryunjukim@gmail.com)
 
-Add authentication & admin dashboard
+---
 
-Improve performance & caching
-
-Deploy using Terraform for Infrastructure as Code (IaC)
-
-Author
-
-Mary Yunju Kim
-
-LinkedIn
-
-Email
-
-Acknowledgments
-
-This project is inspired by the Azure Cloud Resume Challenge by Forrest Brazeal.
+## Acknowledgments
+This project is inspired by the **Azure Cloud Resume Challenge** by [Forrest Brazeal](https://cloudresumechallenge.dev/).
 

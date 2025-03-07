@@ -1,0 +1,31 @@
+name: Deploy Azure Function App
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ 4889b2cc-08e3-4b7e-abd9-3febd7f39335 }}
+          tenant-id: ${{ 29ff071d-bb0b-45d7-b18a-949833a010e7 }}
+          subscription-id: ${{ 53e3f0f5-925a-4fad-83b6-3d251177674a }}
+
+      - name: Deploy to Azure Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: "mary-cloud-cv-api" # Your Function App name
+          package: '.' # Adjust if needed
